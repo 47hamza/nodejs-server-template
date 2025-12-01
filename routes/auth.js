@@ -1,0 +1,13 @@
+const {AuthController} = require("../controllers/auth");
+const {isAuthenticated, isAuthorized} = require("../middlewares/authentication");
+const {ROLES} = require("../constants/roles");
+const router = require("express").Router();
+
+router.route("/register").post(AuthController.register);
+router.route("/login").post(AuthController.login);
+router.route("/me").get(isAuthenticated, isAuthorized(ROLES.USER, ROLES.ADMIN), AuthController.me);
+router.route("/users").get(isAuthenticated, isAuthorized(ROLES.ADMIN), AuthController.allUsers);
+router.route("/update/:id").put(isAuthenticated, isAuthorized(ROLES.USER, ROLES.ADMIN), AuthController.update);
+router.route("/delete/:id").delete(isAuthenticated, isAuthorized(ROLES.ADMIN), AuthController.destroy);
+
+module.exports = router;
