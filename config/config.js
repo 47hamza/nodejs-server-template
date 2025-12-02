@@ -12,4 +12,6 @@ module.exports.CONFIG={
     MAIL_HOST: process.env.MAIL_HOST,
     MAIL_USERNAME: process.env.MAIL_USERNAME,
     MAIL_PASSWORD: process.env.MAIL_PASSWORD,
+    COMPANY_NAME: process.env.COMPANY_NAME,
+    SERVER_URL: process.env.SERVER_URL,
 }

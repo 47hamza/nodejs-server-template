@@ -3,16 +3,17 @@ const {ROLES, TYPES} = require("../constants/roles");
 
 const user = new mongoose.Schema({
     name: {type: String, required: true, trim: true},
+    age: {type: Number, required: true, trim: true},
     email: {type: String, required: true, trim: true},
     password: {type: String, required: true, trim: true},
-    phone: {type: String, required: false, trim: true},
+    phone: {type: String, required: true, trim: true},
+    address: {type: String, required: true, trim: true},
     picture: {
         type: String,
         required: false,
         trim: true,
         default: "https://res.cloudinary.com/dyhw94ngc/image/upload/v1752352074/21104_adut1e.png"
     },
-    country: {type: String, required: false, trim: true},
     role: {
         type: Number,
         required: true,
@@ -25,6 +26,8 @@ const user = new mongoose.Schema({
         enum: [TYPES.ADMIN, TYPES.USER],
         default: TYPES.USER,
     },
+    isVerified: {type: Boolean, required: false, default: false},
+    verifyCode: {type: String, required: false, default: null}
 }, {timestamps: true});
 
 const User = mongoose.model("User", user);
