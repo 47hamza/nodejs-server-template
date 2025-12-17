@@ -21,7 +21,9 @@ async function seedUsers(name) {
                 role: 0,
                 type: "admin",
                 age: 35,
-                password: encryptPassword("admin@12345")
+                password: encryptPassword("admin@12345"),
+                isVerified: true,
+                verifyCode: null
             }
         ];
 

@@ -112,58 +112,103 @@ const forgotPassword = async (req, res) => {
     }
 };
 
- const me = async (req, res) => {
-     try {
-         // get email form request
-         const { email } = req.user;
-         // find user
-         let user = await User.findOne({ email }).select("-password");
-         // if not user found return error
-         if (!user) return json(res, statusCode.NOT_FOUND, "User not exist!");
-         // send data if user found
-         json(res, statusCode.OK, RESPONSE_MESSAGES.DATA_FETCHED, {user, token: req.token});
-     } catch (error) {
-         json(res, statusCode.INTERNAL_SERVER_ERROR, {user: RESPONSE_MESSAGES.USER_INTERNAL_SERVER_ERROR, system: error.message});
-     }
- };
- 
-// const update = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const updated = await Auth.findByIdAndUpdate(id, req.body, {
-//             new: true,
-//             runValidators: true,
-//         });
-//         if (!updated) {
-//             return json(res, statusCode.NOT_FOUND, "User not found.");
-//         }
-//         json(res, statusCode.OK, "User updated successfully");
-//     } catch (error) {
-//         json(res, statusCode.INTERNAL_SERVER_ERROR, {user: RESPONSE_MESSAGES.USER_INTERNAL_SERVER_ERROR, system: error.message});
-//     }
-// };
+const me = async (req, res) => {
+    try {
+        // get email form request
+        const {email} = req.user;
+        // find user
+        let user = await User.findOne({email}).select("-password");
+        // if not user found return error
+        if (!user) return json(res, statusCode.NOT_FOUND, "User not exist!");
+        // send data if user found
+        json(res, statusCode.OK, RESPONSE_MESSAGES.DATA_FETCHED, {user, token: req.token});
+    } catch (error) {
+        json(res, statusCode.INTERNAL_SERVER_ERROR, {
+            user: RESPONSE_MESSAGES.USER_INTERNAL_SERVER_ERROR,
+            system: error.message
+        });
+    }
+};
 
-// const allUsers = async (req, res) => {
-//     try {
-//         const data = await Auth.find({type: 'user', role: 1});
-//         json(res, statusCode.OK, RESPONSE_MESSAGES.DATA_FETCHED,data);
-//     } catch (error) {
-//         json(res, statusCode.INTERNAL_SERVER_ERROR, {user: RESPONSE_MESSAGES.USER_INTERNAL_SERVER_ERROR, system: error.message});
-//     }
-// };
+const update = async (req, res) => {
+    try {
+        const {id} = req.params;
+        const updated = await User.findByIdAndUpdate(id, req.body, {
+            new: true,
+            runValidators: true,
+        });
+        if (!updated) {
+            return json(res, statusCode.NOT_FOUND, "User not found.");
+        }
+        json(res, statusCode.OK, "User updated successfully");
+    } catch (error) {
+        json(res, statusCode.INTERNAL_SERVER_ERROR, {
+            user: RESPONSE_MESSAGES.USER_INTERNAL_SERVER_ERROR,
+            system: error.message
+        });
+    }
+};
 
-// const destroy = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const deleted = await Auth.findByIdAndDelete(id);
-//         if (!deleted) {
-//             return json(res, statusCode.NOT_FOUND, "User not found.");
-//         }
-//         json(res, statusCode.OK, "User deleted successfully");
-//     } catch (error) {
-//         json(res, statusCode.INTERNAL_SERVER_ERROR, {user: RESPONSE_MESSAGES.USER_INTERNAL_SERVER_ERROR, system: error.message});
-//     }
-// };
+const allUsers = async (req, res) => {
+    try {
+        const data = await User.find({type: 'user', role: 1});
+        json(res, statusCode.OK, RESPONSE_MESSAGES.DATA_FETCHED, data);
+    } catch (error) {
+        json(res, statusCode.INTERNAL_SERVER_ERROR, {
+            user: RESPONSE_MESSAGES.USER_INTERNAL_SERVER_ERROR,
+            system: error.message
+        });
+    }
+};
+
+const destroy = async (req, res) => {
+    try {
+        const {id} = req.params;
+        const deleted = await User.findByIdAndDelete(id);
+        if (!deleted) {
+            return json(res, statusCode.NOT_FOUND, "User not found.");
+        }
+        json(res, statusCode.OK, "User deleted successfully");
+    } catch (error) {
+        json(res, statusCode.INTERNAL_SERVER_ERROR, {
+            user: RESPONSE_MESSAGES.USER_INTERNAL_SERVER_ERROR,
+            system: error.message
+        });
+    }
+};
+
+const changePassword = async (req, res) => {
+    try {
+        const {oldPassword, newPassword} = req.body;
+        // find user
+        let user = await User.findOne({_id: req?.user?._id});
+        // if not user found return error
+        if (!user) return json(res, statusCode.NOT_FOUND, "User not exist!");
+
+        const checkPassword = compareEncryptedPassword(oldPassword, user?.password)
+        if (!checkPassword) return json(res, statusCode.BAD_REQUEST, "Invalid old password.");
+
+        const updated = await User.findByIdAndUpdate(
+            req?.user?._id,
+            {
+                password: encryptPassword(newPassword)
+            },
+            {
+                new: true,
+                runValidators: true,
+            }
+        );
+        if (!updated) {
+            return json(res, statusCode.NOT_FOUND, "Password not changed.");
+        }
+        json(res, statusCode.OK, "Password changed successfully.");
+    } catch (error) {
+        json(res, statusCode.INTERNAL_SERVER_ERROR, {
+            user: RESPONSE_MESSAGES.USER_INTERNAL_SERVER_ERROR,
+            system: error.message
+        });
+    }
+};
 
 
 module.exports.AuthController = {
@@ -172,7 +217,8 @@ module.exports.AuthController = {
     verify,
     forgotPassword,
     me,
-    // update,
-    // allUsers,
-    // destroy
+    update,
+    allUsers,
+    destroy,
+    changePassword
 };
